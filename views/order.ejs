@@ -1,0 +1,18 @@
+<%- include('layout') %>
+
+<div class="container">
+
+<div class="order-summary">
+  <h1>Order Placed ✅</h1>
+  <p>Thank you, Sahil! Your order has been placed.</p>
+
+  <div class="order-card">
+    <h2><%= item.name %></h2>
+    <p>From: <strong><%= restaurant.name %></strong> (<%= restaurant.location %>)</p>
+    <p>Price: <strong>₹ <%= item.price %></strong></p>
+  </div>
+
+  <a href="/" class="btn">Back to Home</a>
+</div>
+
+</div>

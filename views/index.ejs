@@ -1,0 +1,22 @@
+<%- include('layout') %>
+
+<div class="container">
+
+<h1 class="page-title">Discover the best food & drinks</h1>
+
+<div class="restaurant-grid">
+  <% restaurants.forEach(r => { %>
+    <div class="restaurant-card">
+      <img src="<%= r.image %>" alt="<%= r.name %>" class="restaurant-image" />
+      <div class="restaurant-info">
+        <h2><%= r.name %></h2>
+        <p><%= r.cuisine %> • <%= r.location %></p>
+        <p class="rating">⭐ <%= r.rating %></p>
+        <a href="/restaurant/<%= r.id %>" class="btn">View Menu</a>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+</div>
+

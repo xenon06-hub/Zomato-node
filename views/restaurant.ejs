@@ -1,0 +1,29 @@
+<%- include('layout') %>
+
+<div class="container">
+
+<div class="restaurant-header">
+  <h1><%= restaurant.name %></h1>
+  <p><%= restaurant.cuisine %> • <%= restaurant.location %></p>
+  <p class="rating">⭐ <%= restaurant.rating %></p>
+</div>
+
+<h2 class="section-title">Menu</h2>
+
+<div class="menu-list">
+  <% restaurant.menu.forEach(item => { %>
+    <div class="menu-item">
+      <div>
+        <h3><%= item.name %></h3>
+        <p><%= item.description %></p>
+      </div>
+      <div class="menu-actions">
+        <p class="price">₹ <%= item.price %></p>
+        <a href="/order?restaurantId=<%= restaurant.id %>&itemId=<%= item.itemId %>" class="btn small">Order Now</a>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+</div>
+
