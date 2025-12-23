@@ -9,7 +9,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/xenon06-hub/Zomato-node.git'
+                git 'https:'main'//github.com/xenon06-hub/Zomato-node.git'
             }
         }
 
