@@ -1,17 +1,7 @@
 pipeline {
     agent any
 
-    environment {
-        APP_NAME = "zomato-node"
-    }
-
     stages {
-
-        stage('Checkout Code') {
-            steps {
-                git 'https:'main'//github.com/xenon06-hub/Zomato-node.git'
-            }
-        }
 
         stage('Install Dependencies') {
             steps {
