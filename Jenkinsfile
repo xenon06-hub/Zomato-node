@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         AWS_ACCOUNT_ID = "374331245951"
-        AWS_REGION     = "eu-north-1"
-        REPO_NAME      = "zomato-node"
+        AWS_REGION     = "us-east-1"
+        REPO_NAME      = "zomato-ecr"
         IMAGE_TAG      = "latest"
         ECR_URL        = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
     }
