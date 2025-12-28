@@ -2,25 +2,40 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCOUNT_ID = "374331245951"
-        AWS_REGION     = "us-east-1"
-        REPO_NAME      = "zomato-ecr"
-        IMAGE_TAG      = "latest"
-        ECR_URL        = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        // ---- CHANGE THESE ----
+        AWS_ACCOUNT_ID = "YOUR_AWS_ACCOUNT_ID"
+        AWS_REGION = "ap-south-1"      // change if needed
+        REPOSITORY = "zomato-node"     // ECR repo name
+
+        IMAGE_TAG = "latest"
+
+        IMAGE_NAME = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPOSITORY}:${IMAGE_TAG}"
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main',
+                    url: 'https://github.com/xenon06-hub/Zomato-node.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 sh """
-                  docker build -t ${REPO_NAME}:${IMAGE_TAG} .
+                  docker build -t ${REPOSITORY}:${IMAGE_TAG} .
+                """
+            }
+        }
+
+        stage('Trivy Scan') {
+            steps {
+                sh """
+                  trivy image --exit-code 1 \
+                  --severity HIGH,CRITICAL \
+                  --no-progress \
+                  ${REPOSITORY}:${IMAGE_TAG}
                 """
             }
         }
@@ -29,28 +44,30 @@ pipeline {
             steps {
                 sh """
                   aws ecr get-login-password --region ${AWS_REGION} \
-                  | docker login --username AWS --password-stdin ${ECR_URL}
+                    | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
                 """
             }
         }
 
-        stage('Tag & Push Image') {
+        stage('Tag & Push Image to ECR') {
             steps {
                 sh """
-                  docker tag ${REPO_NAME}:${IMAGE_TAG} ${ECR_URL}/${REPO_NAME}:${IMAGE_TAG}
-                  docker push ${ECR_URL}/${REPO_NAME}:${IMAGE_TAG}
+                  docker tag ${REPOSITORY}:${IMAGE_TAG} ${IMAGE_NAME}
+                  docker push ${IMAGE_NAME}
                 """
             }
         }
 
-        stage('Deploy on EC2 (Docker run)') {
+        stage('Done') {
             steps {
-                sh """
-                  docker rm -f zomato-node || true
-                  docker pull ${ECR_URL}/${REPO_NAME}:${IMAGE_TAG}
-                  docker run -d --name zomato-node -p 3000:3000 ${ECR_URL}/${REPO_NAME}:${IMAGE_TAG}
-                """
+                echo "Build, scan and ECR push completed successfully!"
             }
+        }
+    }
+
+    post {
+        failure {
+            echo "Pipeline failed — check logs (build error or vulnerabilities)."
         }
     }
 }
