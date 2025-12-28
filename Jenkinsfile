@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        // ---- CHANGE THESE ----
-        AWS_ACCOUNT_ID = "YOUR_AWS_ACCOUNT_ID"
-        AWS_REGION = "ap-south-1"      // change if needed
-        REPOSITORY = "zomato-node"     // ECR repo name
+        AWS_ACCOUNT_ID = "374331245951"
+        AWS_REGION     = "ap-south-1"
+        REPOSITORY     = "zomato-node"
 
-        IMAGE_TAG = "latest"
-
+        IMAGE_TAG  = "latest"
         IMAGE_NAME = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPOSITORY}:${IMAGE_TAG}"
+
+        PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     }
 
     stages {
@@ -32,7 +32,9 @@ pipeline {
         stage('Trivy Scan') {
             steps {
                 sh """
-                  trivy image --exit-code 1 \
+                  trivy image \
+                  --exit-code 1 \
+                  --scanners vuln \
                   --severity HIGH,CRITICAL \
                   --no-progress \
                   ${REPOSITORY}:${IMAGE_TAG}
@@ -60,14 +62,14 @@ pipeline {
 
         stage('Done') {
             steps {
-                echo "Build, scan and ECR push completed successfully!"
+                echo "Build, scan, and ECR push completed successfully!"
             }
         }
     }
 
     post {
         failure {
-            echo "Pipeline failed — check logs (build error or vulnerabilities)."
+            echo "Pipeline failed — build error or HIGH/CRITICAL vulnerabilities found."
         }
     }
 }
