@@ -5,6 +5,10 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 374331245951.dkr.ecr.eu-north-1.amazonaws.com
+      
+      - echo Setting up SSH key...
+      - echo "$PRIVATE_KEY" > private.pem
+      - chmod 600 private.pem
 
   build:
     commands:
@@ -13,5 +17,18 @@ phases:
 
   post_build:
     commands:
-      - echo Pushing image...
+      - echo Pushing Docker image...
       - docker push 374331245951.dkr.ecr.eu-north-1.amazonaws.com/zomato-node:latest
+
+      - echo Deploying to EC2...
+      - ssh -o StrictHostKeyChecking=no -i private.pem $EC2_USER@$EC2_HOST "
+        aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 374331245951.dkr.ecr.eu-north-1.amazonaws.com &&
+        docker stop zomato || true &&
+        docker rm zomato || true &&
+        docker pull 374331245951.dkr.ecr.eu-north-1.amazonaws.com/zomato-node:latest &&
+        docker run -d -p 3000:3000 --name zomato 374331245951.dkr.ecr.eu-north-1.amazonaws.com/zomato-node:latest
+        "
+
+artifacts:
+  files:
+    - '**/*'
