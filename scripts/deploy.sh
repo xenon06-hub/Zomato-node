@@ -1,13 +1,15 @@
 #!/bin/bash
+set -e
 
-# Stop running container if exists
+echo "Logging into ECR..."
+aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 374331245951.dkr.ecr.eu-north-1.amazonaws.com
+
+echo "Stopping old container..."
 docker stop zomato || true
-
-# Remove container if exists
 docker rm zomato || true
 
-# Pull latest image from ECR
+echo "Pulling latest image..."
 docker pull 374331245951.dkr.ecr.eu-north-1.amazonaws.com/zomato-node:latest
 
-# Run container again
+echo "Starting new container..."
 docker run -d -p 3000:3000 --name zomato 374331245951.dkr.ecr.eu-north-1.amazonaws.com/zomato-node:latest
